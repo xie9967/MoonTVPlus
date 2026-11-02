@@ -165,6 +165,7 @@ jobs:
           EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
           EDGEONE_PROJECT_NAME: ${{ inputs.project_name }}
           EDGEONE_AREA: ${{ inputs.area }}
+          EDGEONE_SITE: global
         run: |
           if [ -z "$EDGEONE_API_TOKEN" ]; then
             echo "EDGEONE_API_TOKEN secret is required" >&2
@@ -174,7 +175,8 @@ jobs:
           pnpm exec edgeone makers deploy .edgeone \
             -n "$EDGEONE_PROJECT_NAME" \
             -t "$EDGEONE_API_TOKEN" \
-            -a "$EDGEONE_AREA" | tee edgeone-deploy.log
+            -a "$EDGEONE_AREA" \
+            --site global | tee edgeone-deploy.log
 
           deploy_url=$(grep '^EDGEONE_DEPLOY_URL=' edgeone-deploy.log | tail -n 1 | cut -d= -f2-)
           project_id=$(grep '^EDGEONE_PROJECT_ID=' edgeone-deploy.log | tail -n 1 | cut -d= -f2-)
@@ -185,6 +187,7 @@ jobs:
         if: ${{ inputs.sync_environment }}
         env:
           EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
+          EDGEONE_SITE: global
         run: |
           keys=(
             NEXT_PUBLIC_STORAGE_TYPE NEXT_PUBLIC_SITE_NAME NEXT_PUBLIC_SEARCH_MAX_PAGE
@@ -212,7 +215,8 @@ jobs:
             value="${!key-}"
             if [ -n "$value" ]; then
               echo "Syncing $key"
-              pnpm exec edgeone makers env set "$key" "$value" -t "$EDGEONE_API_TOKEN"
+              pnpm exec edgeone makers env set "$key" "$value" -t "$EDGEONE_API_TOKEN" \
+              --site global
             fi
           done
 
@@ -223,11 +227,13 @@ jobs:
           EDGEONE_API_TOKEN: ${{ secrets.EDGEONE_API_TOKEN }}
           EDGEONE_PROJECT_NAME: ${{ inputs.project_name }}
           EDGEONE_AREA: ${{ inputs.area }}
+          EDGEONE_SITE: global
         run: |
           pnpm exec edgeone makers deploy .edgeone \
             -n "$EDGEONE_PROJECT_NAME" \
             -t "$EDGEONE_API_TOKEN" \
-            -a "$EDGEONE_AREA" | tee edgeone-redeploy.log
+            -a "$EDGEONE_AREA" \
+            --site global | tee edgeone-redeploy.log
 
           deploy_url=$(grep '^EDGEONE_DEPLOY_URL=' edgeone-redeploy.log | tail -n 1 | cut -d= -f2-)
           project_id=$(grep '^EDGEONE_PROJECT_ID=' edgeone-redeploy.log | tail -n 1 | cut -d= -f2-)
